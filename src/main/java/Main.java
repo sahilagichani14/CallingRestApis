@@ -25,10 +25,13 @@ public class Main {
                 .header("X-RapidAPI-Key", "SIGN-UP-FOR-KEY")
                 .header("X-RapidAPI-Host", "love-calculator.p.rapidapi.com")
                 .method("GET", HttpRequest.BodyPublishers.noBody())
+                .setHeader("Content-Type", "application/json")
                 .build();
         while (true) {
             HttpResponse<String> get_response = HttpClient.newHttpClient().send(get_request, HttpResponse.BodyHandlers.ofString());
             System.out.println(get_response.body());
+            System.out.println(get_response.statusCode());
+            get_response.headers().map().forEach((header, value) -> System.out.println(header + " = " + String.join(", ", value)));
 
             // org.json.JSONObject
             JSONObject obj = new JSONObject(get_response.body());
@@ -55,6 +58,18 @@ public class Main {
                 .build();
         HttpResponse<String> post_response = HttpClient.newHttpClient().send(post_request, HttpResponse.BodyHandlers.ofString());
         System.out.println(post_response.body());
+
+        HttpClient.newHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
+            .thenApply(response -> {
+                System.out.println("Http status: " + response.statusCode());
+                System.out.println("Headers:");
+                response.headers().map().forEach((header, value) -> System.out.println(header + " = " + String.join(", ", value)));
+                return response;
+            })
+            .thenApply(HttpResponse::body)
+            .thenApply(ExampleUtils::toObject)
+            .thenAccept(createdUser -> System.out.println("New user created asynchronously: " + createdUser))
+            .join();
 
          */
     }
